@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>OverDrive Read Dependencies</title>
+		<link href="styles.css" media="all" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="../d3/d3.v3.js"></script>
+		<script>document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')</script>
+    </head>
+    <body>
+        <script type="text/javascript">
+			// http://blog.thomsonreuters.com/index.php/mobile-patent-suits-graphic-of-the-day/
+
+			var w = 600,
+				h = 500;
+
+			var rScale = function(w){ return 30 + w * 4; }
+			var fScale = d3.scale.linear()
+				.domain([0, 20])
+				.range([10, 30]);
+			var colors = d3.scale.category20c();
+			
+			var svg = d3.select("body").append("svg:svg")
+				.attr("width", "100%")
+				.attr("height", "100%");
+
+			// predefine some markers
+			svg.append("svg:defs").selectAll("marker")
+				.data(["dependency"])
+			  .enter().append("svg:marker")
+				.attr("id", String)
+				.attr("orient", "auto")
+			  .append("svg:path")
+				.attr("d", "M0,-3 L5,0 L0,3");
+				
+			d3.json("../deps.json", function(deps){
+				var nodes = {};
+				var links = [];
+				
+				// create all the nodes
+				deps.forEach(function(dep){
+					var sourceNode = { name: dep.name, classes: dep.classes || "" };
+					nodes[dep.name] = sourceNode;
+				});
+
+				// create all the links
+				deps.forEach(function(dep){
+					dep.imports.forEach(function(targetName){
+						links.push({ source: nodes[dep.name], target: nodes[targetName] });
+					});
+				});
+				
+				var force = d3.layout.force()
+					.nodes(d3.values(nodes))
+					.links(links)
+					.size([w, h])
+					.linkDistance(150)
+					.charge(-800)
+					.on("tick", tick)
+					.start();
+
+				var path = svg.append("svg:g").selectAll("path")
+					.data(force.links())
+				  .enter().append("svg:path")
+					.attr("class", "link")
+					.attr("marker-end", "url(#dependency)");
+
+				var circle = svg.append("svg:g").selectAll("circle")
+					.data(force.nodes())
+				  .enter().append("svg:circle")
+					.attr("r", function(d){ return rScale(d.weight);})
+					.attr("fill", function(d,i) { return colors(i); })
+					.call(force.drag);
+
+				var text = svg.append("svg:g").selectAll("g")
+					.data(force.nodes())
+				  .enter().append("svg:g");
+
+				text.append("svg:text")
+					.attr("y", ".31em")
+					.text(function(d) { return d.name; })
+					.style("font-size", function(d){ return fScale(d.weight); });
+			
+				function tick() {
+				  path.attr("d", function(d) {
+					// adjust the destination line endpoint to the edge of the circle, not its center
+					// MATH. NOT EVEN ONCE.
+					var targetRadius = rScale(d.target.weight) + 10 + 4 /* marker width? stroke width? idk */ ;
+					var angle = Math.atan2(d.target.y - d.source.y, d.target.x - d.source.x);
+					var x = targetRadius * Math.cos(angle);
+					var y = targetRadius * Math.sin(angle);
+					var dx = d.target.x-x, dy = d.target.y-y;
+
+					return "M" + d.source.x + "," + d.source.y + "," + dx + "," + dy; 
+				  });
+
+				  circle.attr("transform", function(d) {
+					return "translate(" + d.x + "," + d.y + ")";
+				  });
+
+				  text.attr("transform", function(d) {
+					return "translate(" + d.x + "," + d.y + ")";
+				  });
+				}		
+			});
+
+		</script>
+    </body>
+</html> 

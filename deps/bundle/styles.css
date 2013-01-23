@@ -1,0 +1,48 @@
+body { 
+  padding: 0; 
+  margin: 0;
+}
+.node {
+  font: 14px;
+}
+.ring {
+  cursor: move;
+  fill: none;
+  stroke: #ddd;
+  stroke-opacity: 1;
+}
+.node:hover {
+  fill: #1f77b4;
+}
+.link {
+  fill: none;
+  stroke: #1f77b4;
+  stroke-opacity: 1;
+  pointer-events: none;
+}
+.link.source, .link.target {
+  stroke-opacity: 1;
+  stroke-width: 2px;
+}
+.node.target {
+  fill: #d62728 !important;
+}
+.link.source {
+  stroke: #d62728;
+}
+.node.source {
+  fill: #2ca02c;
+}
+.link.target {
+  stroke: #2ca02c;
+}
+#legend rect{
+	fill: #ddd;
+	fill-opacity: .5;
+}
+#legend{
+	font-size: 12px;
+}
+#legend .var {
+	font-style: italic;
+}

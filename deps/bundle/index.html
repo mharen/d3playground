@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>OverDrive Read Dependencies</title>
+		<link href="styles.css" media="all" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="../d3/d3.v3.js"></script>
+        <script type="text/javascript" src="../packages.js"></script>
+		<script type="text/javascript" src="legend.js"></script>
+		<script>document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')</script>
+    </head>
+    <body>
+        <script type="text/javascript">
+		// mbostock.github.com/d3/talk/20111116/bundle.html
+				
+			var diameter = 650,
+				radius = diameter / 2,
+				innerRadius = radius - 120;
+
+			var cluster = d3.layout.cluster()
+				.size([360, innerRadius])
+				.sort(function(a,b){ return d3.ascending(a.name, b.name); });
+			 
+			var bundle = d3.layout.bundle();
+			 
+			var line = d3.svg.line.radial()
+				.interpolate("bundle")
+				.tension(.65)
+				.radius(function(d) { return d.y; })
+				.angle(function(d) { return d.x / 180 * Math.PI; });
+			 
+			var svg = d3.select("body").append("svg")
+				.attr("width", diameter)
+				.attr("height", diameter);
+				
+			var h = 60, w = 175;
+			
+			var g = svg.append("g")
+				.attr("transform", "translate(" + radius + "," + radius + ")")
+
+			appendLegend(svg);
+								
+			g.append("svg:circle")
+				.attr("class", "ring") 
+				.attr("r", innerRadius)
+				.attr("cx", 0)
+				.attr("cy", 0);
+				
+			d3.json("../deps.json", function(classes){
+				var nodes = cluster.nodes(packages.root(classes)),
+					links = packages.imports(nodes),
+					splines = bundle(links);
+					  
+				g.selectAll(".link")
+					.data(links)
+				  .enter().append("path")
+					.attr("class", function(d) { return (d.source && d.target)? "link source-" + d.source.name + " target-" + d.target.name : "link unknown"; })
+					.attr("d", function(d, i){ return line(splines[i]); });
+				 
+			    g.selectAll(".node")
+				    .data(nodes.filter(function(n) { return !n.children; }))
+				  .enter().append("g")
+  				    .attr("class", "node")
+				    .attr("id", function(d) { return "node-" + d.name; })
+				    .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + d.y + ")"; })
+				  .append("text")
+  				    .attr("dx", function(d) { return d.x < 180 ? 8 : -8; })
+				    .attr("dy", ".31em")
+				    .attr("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
+				    .attr("transform", function(d) { return d.x < 180 ? null : "rotate(180)"; })
+				    .text(function(d) { return d.name; })
+				    .on("mouseover", mouseover)
+				    .on("mouseout", mouseout);
+			});
+			
+			function mouseover(d) {
+			  g.selectAll("path.link.target-" + d.name)
+				  .classed("target", true)
+				  .each(updateNodes("source", true));
+
+			  g.selectAll("path.link.source-" + d.name)
+				  .classed("source", true)
+				  .each(updateNodes("target", true));
+			}
+
+			function mouseout(d) {
+			  g.selectAll("path.link.source-" + d.name)
+				  .classed("source", false)
+				  .each(updateNodes("target", false));
+
+			  g.selectAll("path.link.target-" + d.name)
+				  .classed("target", false)
+				  .each(updateNodes("source", false));
+			}
+
+			function updateNodes(name, value) {
+			  return function(d) {
+				if (value) this.parentNode.appendChild(this);
+				g.select("#node-" + d[name].name).classed(name, value);
+			  };
+			}
+
+		</script>
+    </body>
+</html> 

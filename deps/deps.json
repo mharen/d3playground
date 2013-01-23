@@ -1,0 +1,12 @@
+[
+  {"name": "Computer",     "imports": ["Motherboard", "Power Supply"] },
+  {"name": "Motherboard",  "imports": ["Processor", "Chipset", "Drives", "Memory" ] },
+  {"name": "Power Supply", "imports": ["A/C Power"] },
+  {"name": "Processor",    "imports": [ ] },
+  {"name": "Chipset",      "imports": [ ] },
+  {"name": "Drives",       "imports": ["Primary HD", "DVD Disc"] },
+  {"name": "A/C Power",  "imports": [ ] },
+  {"name": "Primary HD",   "imports": [ ] },
+  {"name": "DVD Disc",     "imports": [ ] },
+  {"name": "Memory",       "imports": [ ] }
+] 
