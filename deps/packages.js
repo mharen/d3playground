@@ -4,15 +4,21 @@ var packages = {
   root: function(classes) {
 	var map = {};
  
+	function safeAttributeString(str) {
+		return String(str).replace(/[^a-zA-Z]/g, '-');
+	}
+
 	function find(name, data) {
 	  var node = map[name], i;
 	  if (!node) {
-		node = map[name] = data || {name: name, children: []};
+		node = map[name] = data || {name: name, children: [] };
 		if (name.length) {
 		  node.parent = find(name.substring(0, i = name.lastIndexOf(".")));
 		  node.parent.children.push(node);
+		  node.key = 'key-' + safeAttributeString(name);
 		}
 	  }
+	  console.log(node);
 	  return node;
 	}
  

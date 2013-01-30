@@ -54,14 +54,14 @@
 				g.selectAll(".link")
 					.data(links)
 				  .enter().append("path")
-					.attr("class", function(d) { return (d.source && d.target)? "link source-" + d.source.name + " target-" + d.target.name : "link unknown"; })
+					.attr("class", function(d) { return (d.source && d.target)? "link source-" + d.source.key + " target-" + d.target.key : "link unknown"; })
 					.attr("d", function(d, i){ return line(splines[i]); });
 				 
 			    g.selectAll(".node")
 				    .data(nodes.filter(function(n) { return !n.children; }))
 				  .enter().append("g")
   				    .attr("class", "node")
-				    .attr("id", function(d) { return "node-" + d.name; })
+				    .attr("id", function(d) { return "node-" + d.key; })
 				    .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + d.y + ")"; })
 				  .append("text")
   				    .attr("dx", function(d) { return d.x < 180 ? 8 : -8; })
@@ -74,21 +74,21 @@
 			});
 			
 			function mouseover(d) {
-			  g.selectAll("path.link.target-" + d.name)
+			  g.selectAll("path.link.target-" + d.key)
 				  .classed("target", true)
 				  .each(updateNodes("source", true));
 
-			  g.selectAll("path.link.source-" + d.name)
+			  g.selectAll("path.link.source-" + d.key)
 				  .classed("source", true)
 				  .each(updateNodes("target", true));
 			}
 
 			function mouseout(d) {
-			  g.selectAll("path.link.source-" + d.name)
+			  g.selectAll("path.link.source-" + d.key)
 				  .classed("source", false)
 				  .each(updateNodes("target", false));
 
-			  g.selectAll("path.link.target-" + d.name)
+			  g.selectAll("path.link.target-" + d.key)
 				  .classed("target", false)
 				  .each(updateNodes("source", false));
 			}
@@ -96,7 +96,7 @@
 			function updateNodes(name, value) {
 			  return function(d) {
 				if (value) this.parentNode.appendChild(this);
-				g.select("#node-" + d[name].name).classed(name, value);
+				g.select("#node-" + d[name].key).classed(name, value);
 			  };
 			}
 
