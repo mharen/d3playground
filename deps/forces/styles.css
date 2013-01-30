@@ -8,8 +8,8 @@ marker {
 }
 path.link {
   fill: none;
-  stroke: #000;
-  stroke-width: 3px;
+  stroke: #444;
+  stroke-width: 1px;
 }
 text {
   pointer-events: none;
